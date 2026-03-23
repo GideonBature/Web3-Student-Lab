@@ -11,8 +11,6 @@ pub struct Certificate {
     pub issue_date: u64,
 }
 
-const CERTIFICATE: Symbol = symbol_short!("CERT");
-
 #[contract]
 pub struct CertificateContract;
 
@@ -29,14 +27,14 @@ impl CertificateContract {
             issue_date,
         };
 
-        env.storage().instance().set(&CERTIFICATE, &cert);
+        env.storage().instance().set(&symbol, &cert);
 
         cert
     }
 
-    /// Retrieve the currently stored certificate.
-    pub fn get_certificate(env: Env) -> Certificate {
-        env.storage().instance().get(&CERTIFICATE).unwrap()
+    /// Retrieve a certificate by its symbol.
+    pub fn get_certificate(env: Env, symbol: Symbol) -> Certificate {
+        env.storage().instance().get(&symbol).unwrap()
     }
 }
 
@@ -71,7 +69,7 @@ mod tests {
             }
         );
 
-        let stored = CertificateContract::get_certificate(env);
+        let stored = CertificateContract::get_certificate(env, symbol);
         assert_eq!(stored, issued);
     }
 }
