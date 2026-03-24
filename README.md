@@ -8,7 +8,11 @@
 
 The platform provides **interactive tools, coding environments, and guided learning paths** designed for beginners and university students.
 
-## 🚀 Core Modules
+## � Frequently Asked Questions
+
+- New contributors with environment issues can start here: [docs/FAQ.md](docs/FAQ.md)
+
+## �🚀 Core Modules
 
 1. **Blockchain Learning Simulator**: Visually learn how blockchains work (create transactions, mine blocks, view hashes, and see how blocks connect).
 2. **Smart Contract Playground**: Write, run, and test smart contracts directly in your browser. Focuses on Soroban contracts written in Rust.
