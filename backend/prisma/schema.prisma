@@ -87,3 +87,15 @@ model Feedback {
   @@unique([studentId, courseId]) // One review per student per course
   @@map("feedback")
 }
+
+model LearningProgress {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  completedLessons String[] // Array of strings for PostgreSQL
+  currentModule    String   @default("mod-1")
+  percentage       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("learning_progress")
+}

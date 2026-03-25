@@ -1,11 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { requestLogger } from './middleware/requestLogger.js';
 import authRoutes from './routes/auth/auth.routes.js';
 import learningRoutes from './routes/learning/learning.routes.js';
-import { requestLogger } from './middleware/requestLogger.js';
-import authRoutes from './routes/auth/auth.routes';
-import learningRoutes from './routes/learning/learning.routes';
+import generatorRoutes from './routes/generator/generator.routes.js';
 import routes from './routes/index.js';
 import prisma from './db/index.js';
 
@@ -26,6 +25,7 @@ app.get('/health', (req: Request, res: Response) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/learning', learningRoutes);
+app.use('/api/generator', generatorRoutes);
 app.use('/api', routes);
 
 // Start server only if not in test environment

@@ -1,6 +1,6 @@
-import { Request, Response, Router } from 'express';
-import * as LearningService from './learning.service.js';
-import { Module } from './types.js';
+import { Router, Request, Response } from 'express';
+import { Module, Lesson, Progress } from './types.js';
+import prisma from '../../db/index.js';
 
 const router = Router();
 
@@ -49,6 +49,8 @@ const modules: Module[] = [
     ],
   },
 ];
+
+// Prisma handles progress storage now
 
 /**
  * @route   GET /api/learning/modules
@@ -105,7 +107,22 @@ router.get('/modules/:moduleId', (req: Request, res: Response) => {
 router.get('/progress/:userId', async (req: Request, res: Response) => {
   try {
     const userId = req.params.userId as string;
-    const progress = await LearningService.getStudentProgress(userId);
+    const progress = await prisma.learningProgress.findUnique({
+      where: { userId },
+    });
+
+    if (!progress) {
+      // Return default progress if user has no progress yet
+      res.json({
+        progress: {
+          userId,
+          completedLessons: [],
+          currentModule: 'mod-1',
+          percentage: 0,
+        },
+      });
+      return;
+    }
 
     res.json({ progress });
   } catch (error) {
@@ -138,7 +155,42 @@ router.post('/progress/:userId/complete', async (req: Request, res: Response) =>
       return;
     }
 
-    const progress = await LearningService.updateProgress(userId, lessonId);
+    // Get user progress from DB
+    let progressRecord = await prisma.learningProgress.findUnique({
+      where: { userId }
+    });
+
+    let completedLessons = progressRecord ? progressRecord.completedLessons : [];
+    let percentage = progressRecord ? progressRecord.percentage : 0;
+
+    // Mark lesson as complete if not already
+    if (!completedLessons.includes(lessonId)) {
+      completedLessons.push(lessonId);
+
+      // Calculate new percentage
+      const totalLessons = modules.reduce(
+        (acc, mod) => acc + mod.lessons.length,
+        0
+      );
+      percentage = Math.round(
+        (completedLessons.length / totalLessons) * 100
+      );
+    }
+
+    // Save back to DB
+    const progress = await prisma.learningProgress.upsert({
+      where: { userId },
+      update: {
+        completedLessons,
+        percentage
+      },
+      create: {
+        userId,
+        completedLessons,
+        currentModule: 'mod-1',
+        percentage
+      }
+    });
 
     res.json({ progress, message: 'Lesson marked as complete' });
   } catch (error) {
